@@ -309,84 +309,247 @@ Tab:CreateButton({
     end
 })
 
--- ========== ABA SKYBOX ==========
+-- ========== ABA SKYBOX (NOVA) ==========
 local TabSky = Window:CreateTab("Skybox", 4483362458)
-TabSky:CreateSection("Céus Disponíveis")
+TabSky:CreateSection("🌌 Skyboxes")
 
-local function resetarCeu()
-    pcall(function()
-        Lighting.ClockTime = 14
-        Lighting.Brightness = 2
-        Lighting.Ambient = Color3.fromRGB(70, 70, 70)
-        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-        Lighting.FogEnd = 100000
-        Lighting.FogStart = 0
-        local atm = Lighting:FindFirstChildOfClass("Atmosphere")
-        if atm then atm:Destroy() end
-        local sky = Lighting:FindFirstChildOfClass("Sky")
-        if sky then
-            sky.SkyboxBk = ""
-            sky.SkyboxDn = ""
-            sky.SkyboxFt = ""
-            sky.SkyboxLf = ""
-            sky.SkyboxRt = ""
-            sky.SkyboxUp = ""
-        end
-    end)
-end
-
-local function aplicarCeu(config)
-    pcall(function()
-        local atmAntigo = Lighting:FindFirstChildOfClass("Atmosphere")
-        if atmAntigo then atmAntigo:Destroy() end
-        local skyAntigo = Lighting:FindFirstChildOfClass("Sky")
-        if skyAntigo then skyAntigo:Destroy() end
-        
-        Lighting.ClockTime = config.ClockTime or 14
-        Lighting.Brightness = config.Brightness or 2
-        Lighting.Ambient = config.Ambient or Color3.fromRGB(70, 70, 70)
-        Lighting.OutdoorAmbient = config.OutdoorAmbient or Color3.fromRGB(128, 128, 128)
-        Lighting.FogEnd = config.FogEnd or 100000
-        Lighting.FogStart = config.FogStart or 0
-        Lighting.FogColor = config.FogColor or Color3.fromRGB(192, 192, 192)
-        
-        local atm = Instance.new("Atmosphere")
-        atm.Density = config.Density or 0.3
-        atm.Offset = config.Offset or 0
-        atm.Color = config.AtmosphereColor or Color3.fromRGB(199, 199, 199)
-        atm.Decay = config.Decay or Color3.fromRGB(106, 112, 125)
-        atm.Glare = config.Glare or 0
-        atm.Haze = config.Haze or 1.5
-        atm.Parent = Lighting
-        
-        local sky = Instance.new("Sky")
-        sky.Parent = Lighting
-    end)
-end
-
-local ceus = {
-    {Name = "☀️ Dia Limpo", ClockTime = 14, Brightness = 2, Ambient = Color3.fromRGB(70, 70, 70), OutdoorAmbient = Color3.fromRGB(128, 128, 128), FogEnd = 100000, FogColor = Color3.fromRGB(192, 192, 192), AtmosphereColor = Color3.fromRGB(199, 199, 199), Decay = Color3.fromRGB(106, 112, 125), Density = 0.3, Haze = 1.5},
-    {Name = "🌅 Pôr do Sol", ClockTime = 17.5, Brightness = 2, Ambient = Color3.fromRGB(100, 60, 30), OutdoorAmbient = Color3.fromRGB(200, 100, 50), FogEnd = 5000, FogColor = Color3.fromRGB(255, 120, 50), AtmosphereColor = Color3.fromRGB(255, 150, 80), Decay = Color3.fromRGB(255, 100, 50), Density = 0.4, Haze = 3},
-    {Name = "🌇 Céu Vermelho", ClockTime = 18, Brightness = 1.5, Ambient = Color3.fromRGB(120, 30, 20), OutdoorAmbient = Color3.fromRGB(220, 60, 40), FogEnd = 3000, FogColor = Color3.fromRGB(200, 50, 30), AtmosphereColor = Color3.fromRGB(255, 80, 60), Decay = Color3.fromRGB(255, 50, 30), Density = 0.5, Haze = 4},
-    {Name = "🌙 Noite Estrelada", ClockTime = 0, Brightness = 1, Ambient = Color3.fromRGB(20, 20, 40), OutdoorAmbient = Color3.fromRGB(40, 40, 80), FogEnd = 10000, FogColor = Color3.fromRGB(10, 10, 30), AtmosphereColor = Color3.fromRGB(30, 30, 60), Decay = Color3.fromRGB(20, 20, 50), Density = 0.3, Haze = 0},
-    {Name = "💜 Céu Roxo", ClockTime = 20, Brightness = 1.5, Ambient = Color3.fromRGB(60, 30, 90), OutdoorAmbient = Color3.fromRGB(120, 60, 180), FogEnd = 5000, FogColor = Color3.fromRGB(90, 50, 150), AtmosphereColor = Color3.fromRGB(150, 80, 200), Decay = Color3.fromRGB(100, 50, 180), Density = 0.4, Haze = 2},
-    {Name = "🌌 Galáxia", ClockTime = 0, Brightness = 0.8, Ambient = Color3.fromRGB(30, 10, 60), OutdoorAmbient = Color3.fromRGB(80, 40, 150), FogEnd = 8000, FogColor = Color3.fromRGB(40, 20, 80), AtmosphereColor = Color3.fromRGB(100, 50, 180), Decay = Color3.fromRGB(60, 30, 120), Density = 0.35, Haze = 1},
-    {Name = "☁️ Nublado", ClockTime = 12, Brightness = 1.5, Ambient = Color3.fromRGB(80, 80, 80), OutdoorAmbient = Color3.fromRGB(150, 150, 150), FogEnd = 3000, FogColor = Color3.fromRGB(180, 180, 180), AtmosphereColor = Color3.fromRGB(200, 200, 200), Decay = Color3.fromRGB(120, 120, 120), Density = 0.6, Haze = 3},
-    {Name = "🌫️ Nevoeiro", ClockTime = 8, Brightness = 1.2, Ambient = Color3.fromRGB(100, 100, 100), OutdoorAmbient = Color3.fromRGB(180, 180, 180), FogEnd = 500, FogColor = Color3.fromRGB(200, 200, 200), AtmosphereColor = Color3.fromRGB(220, 220, 220), Decay = Color3.fromRGB(150, 150, 150), Density = 0.7, Haze = 5},
-    {Name = "🌊 Azul Oceano", ClockTime = 14, Brightness = 2, Ambient = Color3.fromRGB(30, 80, 120), OutdoorAmbient = Color3.fromRGB(80, 150, 200), FogEnd = 6000, FogColor = Color3.fromRGB(60, 130, 180), AtmosphereColor = Color3.fromRGB(100, 180, 220), Decay = Color3.fromRGB(40, 100, 150), Density = 0.35, Haze = 2},
-    {Name = "💚 Aurora Verde", ClockTime = 2, Brightness = 1.2, Ambient = Color3.fromRGB(20, 60, 40), OutdoorAmbient = Color3.fromRGB(60, 180, 100), FogEnd = 6000, FogColor = Color3.fromRGB(40, 120, 80), AtmosphereColor = Color3.fromRGB(80, 200, 120), Decay = Color3.fromRGB(30, 100, 60), Density = 0.4, Haze = 1.5},
-    {Name = "🔥 Céu de Lava", ClockTime = 18, Brightness = 1.8, Ambient = Color3.fromRGB(120, 40, 20), OutdoorAmbient = Color3.fromRGB(255, 80, 30), FogEnd = 2000, FogColor = Color3.fromRGB(255, 60, 20), AtmosphereColor = Color3.fromRGB(255, 100, 50), Decay = Color3.fromRGB(200, 60, 30), Density = 0.5, Haze = 6},
-    {Name = "❄️ Céu de Gelo", ClockTime = 10, Brightness = 2.5, Ambient = Color3.fromRGB(180, 200, 220), OutdoorAmbient = Color3.fromRGB(220, 240, 255), FogEnd = 5000, FogColor = Color3.fromRGB(200, 220, 240), AtmosphereColor = Color3.fromRGB(220, 240, 255), Decay = Color3.fromRGB(180, 200, 220), Density = 0.4, Haze = 2},
+local SkyList = {
+    "Vaporwave",
+    "Neon City",
+    "Aurora",
+    "Cherry Blossom",
+    "Golden Hour",
+    "Deep Space",
+    "Minecraft Dia",
+    "Minecraft Nether",
+    "Minecraft End",
+    "Minecraft Noite",
+    "Minecraft Amanhecer",
+    "Minecraft Tormenta",
+    "Galaxy",
+    "Red Neon",
+    "Purple Neon",
+    "Ocean",
+    "Sunset",
+    "Cyber",
+    "Normal"
 }
 
-for _, ceu in ipairs(ceus) do
+-- ========== IDs DAS SKYBOXES ==========
+local SkyIDs = {
+    ["Vaporwave"] = {
+        Bk = "rbxassetid://71038245996193",
+        Dn = "rbxassetid://71038245996193",
+        Ft = "rbxassetid://71038245996193",
+        Lf = "rbxassetid://71038245996193",
+        Rt = "rbxassetid://71038245996193",
+        Up = "rbxassetid://71038245996193"
+    },
+    ["Neon City"] = {
+        Bk = "rbxassetid://159454299",
+        Dn = "rbxassetid://159454299",
+        Ft = "rbxassetid://159454299",
+        Lf = "rbxassetid://159454299",
+        Rt = "rbxassetid://159454299",
+        Up = "rbxassetid://159454299"
+    },
+    ["Aurora"] = {
+        Bk = "rbxassetid://12064107",
+        Dn = "rbxassetid://12064107",
+        Ft = "rbxassetid://12064107",
+        Lf = "rbxassetid://12064107",
+        Rt = "rbxassetid://12064107",
+        Up = "rbxassetid://12064107"
+    },
+    ["Cherry Blossom"] = {
+        Bk = "rbxassetid://570557514",
+        Dn = "rbxassetid://570557514",
+        Ft = "rbxassetid://570557514",
+        Lf = "rbxassetid://570557514",
+        Rt = "rbxassetid://570557514",
+        Up = "rbxassetid://570557514"
+    },
+    ["Golden Hour"] = {
+        Bk = "rbxassetid://1876545003",
+        Dn = "rbxassetid://1876545003",
+        Ft = "rbxassetid://1876545003",
+        Lf = "rbxassetid://1876545003",
+        Rt = "rbxassetid://1876545003",
+        Up = "rbxassetid://1876545003"
+    },
+    ["Deep Space"] = {
+        Bk = "rbxassetid://159454299",
+        Dn = "rbxassetid://159454299",
+        Ft = "rbxassetid://159454299",
+        Lf = "rbxassetid://159454299",
+        Rt = "rbxassetid://159454299",
+        Up = "rbxassetid://159454299"
+    },
+    ["Minecraft Dia"] = {
+        Bk = "rbxassetid://570557514",
+        Dn = "rbxassetid://570557514",
+        Ft = "rbxassetid://570557514",
+        Lf = "rbxassetid://570557514",
+        Rt = "rbxassetid://570557514",
+        Up = "rbxassetid://570557514"
+    },
+    ["Minecraft Nether"] = {
+        Bk = "rbxassetid://264095257",
+        Dn = "rbxassetid://264095257",
+        Ft = "rbxassetid://264095257",
+        Lf = "rbxassetid://264095257",
+        Rt = "rbxassetid://264095257",
+        Up = "rbxassetid://264095257"
+    },
+    ["Minecraft End"] = {
+        Bk = "rbxassetid://12064107",
+        Dn = "rbxassetid://12064107",
+        Ft = "rbxassetid://12064107",
+        Lf = "rbxassetid://12064107",
+        Rt = "rbxassetid://12064107",
+        Up = "rbxassetid://12064107"
+    },
+    ["Minecraft Noite"] = {
+        Bk = "rbxassetid://12064107",
+        Dn = "rbxassetid://12064107",
+        Ft = "rbxassetid://12064107",
+        Lf = "rbxassetid://12064107",
+        Rt = "rbxassetid://12064107",
+        Up = "rbxassetid://12064107"
+    },
+    ["Minecraft Amanhecer"] = {
+        Bk = "rbxassetid://1876545003",
+        Dn = "rbxassetid://1876545003",
+        Ft = "rbxassetid://1876545003",
+        Lf = "rbxassetid://1876545003",
+        Rt = "rbxassetid://1876545003",
+        Up = "rbxassetid://1876545003"
+    },
+    ["Minecraft Tormenta"] = {
+        Bk = "rbxassetid://12064107",
+        Dn = "rbxassetid://12064107",
+        Ft = "rbxassetid://12064107",
+        Lf = "rbxassetid://12064107",
+        Rt = "rbxassetid://12064107",
+        Up = "rbxassetid://12064107"
+    },
+    ["Galaxy"] = {
+        Bk = "rbxassetid://159454299",
+        Dn = "rbxassetid://159454299",
+        Ft = "rbxassetid://159454299",
+        Lf = "rbxassetid://159454299",
+        Rt = "rbxassetid://159454299",
+        Up = "rbxassetid://159454299"
+    },
+    ["Red Neon"] = {
+        Bk = "rbxassetid://1876545003",
+        Dn = "rbxassetid://1876545003",
+        Ft = "rbxassetid://1876545003",
+        Lf = "rbxassetid://1876545003",
+        Rt = "rbxassetid://1876545003",
+        Up = "rbxassetid://1876545003"
+    },
+    ["Purple Neon"] = {
+        Bk = "rbxassetid://159454299",
+        Dn = "rbxassetid://159454299",
+        Ft = "rbxassetid://159454299",
+        Lf = "rbxassetid://159454299",
+        Rt = "rbxassetid://159454299",
+        Up = "rbxassetid://159454299"
+    },
+    ["Ocean"] = {
+        Bk = "rbxassetid://1931125436",
+        Dn = "rbxassetid://1931125436",
+        Ft = "rbxassetid://1931125436",
+        Lf = "rbxassetid://1931125436",
+        Rt = "rbxassetid://1931125436",
+        Up = "rbxassetid://1931125436"
+    },
+    ["Sunset"] = {
+        Bk = "rbxassetid://1876545003",
+        Dn = "rbxassetid://1876545003",
+        Ft = "rbxassetid://1876545003",
+        Lf = "rbxassetid://1876545003",
+        Rt = "rbxassetid://1876545003",
+        Up = "rbxassetid://1876545003"
+    },
+    ["Cyber"] = {
+        Bk = "rbxassetid://159454299",
+        Dn = "rbxassetid://159454299",
+        Ft = "rbxassetid://159454299",
+        Lf = "rbxassetid://159454299",
+        Rt = "rbxassetid://159454299",
+        Up = "rbxassetid://159454299"
+    },
+}
+
+-- ========== FUNÇÃO APLICAR SKY ==========
+local skyOriginal = nil
+
+local function salvarSkyOriginal()
+    if skyOriginal then return end
+    local sky = Lighting:FindFirstChildOfClass("Sky")
+    if sky then
+        skyOriginal = {
+            Bk = sky.SkyboxBk, Dn = sky.SkyboxDn, Ft = sky.SkyboxFt,
+            Lf = sky.SkyboxLf, Rt = sky.SkyboxRt, Up = sky.SkyboxUp
+        }
+    end
+end
+
+local function SetSky(nome)
+    pcall(function()
+        salvarSkyOriginal()
+        
+        if nome == "Normal" then
+            local sky = Lighting:FindFirstChildOfClass("Sky")
+            if sky then
+                if skyOriginal then
+                    sky.SkyboxBk = skyOriginal.Bk
+                    sky.SkyboxDn = skyOriginal.Dn
+                    sky.SkyboxFt = skyOriginal.Ft
+                    sky.SkyboxLf = skyOriginal.Lf
+                    sky.SkyboxRt = skyOriginal.Rt
+                    sky.SkyboxUp = skyOriginal.Up
+                else
+                    sky.SkyboxBk = ""
+                    sky.SkyboxDn = ""
+                    sky.SkyboxFt = ""
+                    sky.SkyboxLf = ""
+                    sky.SkyboxRt = ""
+                    sky.SkyboxUp = ""
+                end
+            end
+            return
+        end
+        
+        local ids = SkyIDs[nome]
+        if not ids then return end
+        
+        local sky = Lighting:FindFirstChildOfClass("Sky")
+        if not sky then
+            sky = Instance.new("Sky")
+            sky.Parent = Lighting
+        end
+        
+        sky.SkyboxBk = ids.Bk
+        sky.SkyboxDn = ids.Dn
+        sky.SkyboxFt = ids.Ft
+        sky.SkyboxLf = ids.Lf
+        sky.SkyboxRt = ids.Rt
+        sky.SkyboxUp = ids.Up
+    end)
+end
+
+-- ========== BOTÕES DE SKY ==========
+for _, nome in ipairs(SkyList) do
     TabSky:CreateButton({
-        Name = ceu.Name,
+        Name = "🌌 " .. nome,
         Callback = function()
-            aplicarCeu(ceu)
+            SetSky(nome)
             Rayfield:Notify({
                 Title = "Gk Reach",
-                Content = "Céu: " .. ceu.Name,
+                Content = "🌌 Sky: " .. nome,
                 Duration = 2,
                 Image = 4483362458
             })
@@ -397,18 +560,19 @@ end
 TabSky:CreateSection("Controle")
 
 TabSky:CreateButton({
-    Name = "🔄 RESETAR CÉU",
+    Name = "🔄 RESETAR SKY",
     Callback = function()
-        resetarCeu()
+        SetSky("Normal")
         Rayfield:Notify({
             Title = "Gk Reach",
-            Content = "Céu restaurado!",
+            Content = "Sky restaurada!",
             Duration = 2,
             Image = 4483362458
         })
     end
 })
 
+-- Slider de horário
 TabSky:CreateSlider({
     Name = "Horário do Dia",
     Range = {0, 24},
