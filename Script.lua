@@ -915,6 +915,192 @@ RunService.RenderStepped:Connect(function()
 end)
 
 print("✅ FOLLOW BALL carregado! Botão ⚽ no canto")
+
+-- ========== ABA CORES DE BOLA ==========
+local TabCoresBola = Window:CreateTab("Cores da Bola", 4483362458)
+TabCoresBola:CreateSection("🎨 Escolha uma Cor")
+
+-- ========== VARIÁVEIS ==========
+local corBolaAtiva = false
+local corBolaAtual = Color3.fromRGB(255, 255, 255)
+
+-- ========== FUNÇÃO PEGAR TODAS AS BOLAS ==========
+local function getTodasBolas()
+    local bolas = {}
+    for _, v in ipairs(game.Workspace:GetDescendants()) do
+        if v:IsA("BasePart") or v:IsA("MeshPart") then
+            local isBola = false
+            
+            -- Por nome
+            local nomes = {"TPS","ESA","MRS","PRS","MPS","SSS","AIFA","RBZ","RSF","VEF","SAML","Ball","Bola"}
+            for _, n in ipairs(nomes) do
+                if v.Name == n then isBola = true break end
+            end
+            
+            -- Por tamanho esférico
+            if not isBola then
+                local s = v.Size
+                local m = (s.X + s.Y + s.Z) / 3
+                local d = math.abs(s.X - m) + math.abs(s.Y - m) + math.abs(s.Z - m)
+                if m > 0.5 and m < 8 and d < 0.5 then isBola = true end
+            end
+            
+            if v:IsDescendantOf(player.Character) then isBola = false end
+            if isBola then table.insert(bolas, v) end
+        end
+    end
+    return bolas
+end
+
+-- ========== APLICAR COR ==========
+local function aplicarCorBola(cor)
+    for _, bola in ipairs(getTodasBolas()) do
+        pcall(function()
+            bola.Color = cor
+            bola.Material = Enum.Material.SmoothPlastic
+        end)
+    end
+end
+
+-- ========== TOGGLE PRINCIPAL ==========
+TabCoresBola:CreateToggle({
+    Name = "🎨 Ativar Mudança de Cor",
+    CurrentValue = false,
+    Flag = "CorBolaToggle",
+    Callback = function(v)
+        corBolaAtiva = v
+        if v then
+            aplicarCorBola(corBolaAtual)
+        end
+    end
+})
+
+-- ========== COLOR PICKER ==========
+TabCoresBola:CreateColorPicker({
+    Name = "Cor Personalizada",
+    Color = Color3.fromRGB(255, 255, 255),
+    Flag = "CorBolaPicker",
+    Callback = function(v)
+        corBolaAtual = v
+        if corBolaAtiva then
+            aplicarCorBola(v)
+        end
+    end
+})
+
+-- ========== CORES PRONTAS ==========
+TabCoresBola:CreateSection("🌈 Cores Rápidas")
+
+local Cores = {
+    {"⚪ Branco", Color3.fromRGB(255, 255, 255)},
+    {"⚫ Preto", Color3.fromRGB(30, 30, 30)},
+    {"🔴 Vermelho", Color3.fromRGB(255, 0, 0)},
+    {"🔵 Azul", Color3.fromRGB(0, 100, 255)},
+    {"🟢 Verde", Color3.fromRGB(0, 255, 0)},
+    {"🟡 Amarelo", Color3.fromRGB(255, 255, 0)},
+    {"🟣 Roxo", Color3.fromRGB(150, 0, 255)},
+    {"🟠 Laranja", Color3.fromRGB(255, 150, 0)},
+    {"💗 Rosa", Color3.fromRGB(255, 0, 150)},
+    {"💠 Ciano", Color3.fromRGB(0, 255, 255)},
+    {"🌟 Dourado", Color3.fromRGB(255, 215, 0)},
+    {"💜 Neon Roxo", Color3.fromRGB(200, 0, 255)},
+    {"💚 Neon Verde", Color3.fromRGB(0, 255, 100)},
+    {"🧡 Neon Laranja", Color3.fromRGB(255, 100, 0)},
+    {"💖 Neon Rosa", Color3.fromRGB(255, 20, 147)},
+    {"🔵 Azul Marinho", Color3.fromRGB(0, 0, 139)},
+    {"🟤 Marrom", Color3.fromRGB(139, 69, 19)},
+    {"⚪ Cinza", Color3.fromRGB(128, 128, 128)},
+    {"🔘 Cinza Escuro", Color3.fromRGB(60, 60, 60)},
+    {"💎 Azul Bebê", Color3.fromRGB(173, 216, 230)},
+    {"🍇 Uva", Color3.fromRGB(100, 0, 150)},
+    {"🍊 Tangerina", Color3.fromRGB(255, 100, 0)},
+    {"🍋 Limão", Color3.fromRGB(200, 255, 0)},
+    {"🍀 Trevo", Color3.fromRGB(0, 150, 50)},
+    {"🌊 Oceano", Color3.fromRGB(0, 80, 150)},
+    {"🔥 Fogo", Color3.fromRGB(220, 50, 0)},
+    {"❄️ Gelo", Color3.fromRGB(200, 240, 255)},
+    {"🌙 Meia-Noite", Color3.fromRGB(20, 20, 60)},
+    {"🌅 Pôr do Sol", Color3.fromRGB(255, 100, 50)},
+    {"🌈 Arco-Íris", Color3.fromRGB(255, 150, 200)},
+}
+
+for _, c in ipairs(Cores) do
+    TabCoresBola:CreateButton({
+        Name = c[1],
+        Callback = function()
+            corBolaAtual = c[2]
+            if corBolaAtiva then
+                aplicarCorBola(c[2])
+            end
+            Rayfield:Notify({
+                Title = "Gk Reach",
+                Content = "Cor aplicada: " .. c[1],
+                Duration = 2,
+                Image = 4483362458
+            })
+        end
+    })
+end
+
+-- ========== EFEITOS ESPECIAIS ==========
+TabCoresBola:CreateSection("✨ Efeitos Especiais")
+
+TabCoresBola:CreateButton({
+    Name = "🌈 Modo Arco-Íris",
+    Callback = function()
+        task.spawn(function()
+            while corBolaAtiva do
+                local hue = tick() % 5 / 5
+                local cor = Color3.fromHSV(hue, 1, 1)
+                corBolaAtual = cor
+                aplicarCorBola(cor)
+                task.wait(0.1)
+            end
+        end)
+        Rayfield:Notify({
+            Title = "Gk Reach",
+            Content = "🌈 Modo Arco-Íris ativado!",
+            Duration = 2,
+            Image = 4483362458
+        })
+    end
+})
+
+TabCoresBola:CreateButton({
+    Name = "🎲 Cor Aleatória",
+    Callback = function()
+        local cor = Color3.fromRGB(
+            math.random(0, 255),
+            math.random(0, 255),
+            math.random(0, 255)
+        )
+        corBolaAtual = cor
+        if corBolaAtiva then
+            aplicarCorBola(cor)
+        end
+    end
+})
+
+TabCoresBola:CreateButton({
+    Name = "🔄 Restaurar Original",
+    Callback = function()
+        corBolaAtual = Color3.fromRGB(255, 255, 255)
+        aplicarCorBola(Color3.fromRGB(255, 255, 255))
+        Rayfield:Notify({
+            Title = "Gk Reach",
+            Content = "Bola restaurada!",
+            Duration = 2,
+            Image = 4483362458
+        })
+    end
+})
+
+-- ========== LOOP ==========
+game:GetService("RunService").Heartbeat:Connect(function()
+    if corBolaAtiva then
+        aplicarCorBola(corBolaAtual)
+    end
+end)
 -- ========== INIT ==========
 refreshBalls(true)
 updateReachSphere()
