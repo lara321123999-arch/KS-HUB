@@ -760,10 +760,161 @@ for _, c in ipairs(celebs) do
         end
     })
 end
+-- ========== FOLLOW BALL + BOTÃO FLUTUANTE ==========
+-- Criador: Lara
 
+local player = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game.Workspace
 
--- ========== TOGGLE FIRE ==========
+-- NOMES DAS BOLAS DO TCS
+local ballSet = {
+    ["TPS"] = true, ["ESA"] = true, ["MRS"] = true, ["PRS"] = true,
+    ["MPS"] = true, ["SSS"] = true, ["AIFA"] = true, ["RBZ"] = true,
+    ["RSF"] = true, ["VEF"] = true, ["SAML"] = true, ["Ball"] = true,
+    ["Bola"] = true
+}
 
+local followEnabled = false
+
+-- ========== CRIAR GUI ==========
+local FloatGui = Instance.new("ScreenGui")
+FloatGui.Name = "GkFloatGui"
+FloatGui.ResetOnSpawn = false
+FloatGui.DisplayOrder = 9999
+FloatGui.Parent = player:WaitForChild("PlayerGui")
+
+-- ========== BOTÃO FLUTUANTE ==========
+local FloatBtn = Instance.new("TextButton")
+FloatBtn.Size = UDim2.new(0, 140, 0, 42)
+FloatBtn.Position = UDim2.new(0.83, 0, 0.20, 0)
+FloatBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+FloatBtn.BackgroundTransparency = 0.1
+FloatBtn.Text = "⚽ FOLLOW: OFF"
+FloatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FloatBtn.Font = Enum.Font.GothamBlack
+FloatBtn.TextSize = 12
+FloatBtn.AutoButtonColor = false
+FloatBtn.BorderSizePixel = 0
+FloatBtn.Parent = FloatGui
+Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 10)
+
+local FloatStroke = Instance.new("UIStroke", FloatBtn)
+FloatStroke.Color = Color3.fromRGB(0, 255, 255)
+FloatStroke.Thickness = 1.5
+FloatStroke.Transparency = 0.2
+
+-- ========== ARRASTAR ==========
+local dragging = false
+local dragStart, startPos, dragInput, moved
+
+FloatBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        moved = false
+        dragStart = input.Position
+        startPos = FloatBtn.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then 
+                dragging = false 
+            end
+        end)
+    end
+end)
+
+FloatBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement 
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
+            moved = true
+            FloatBtn.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+        end
+    end
+end)
+
+-- ========== TOGGLE ==========
+FloatBtn.MouseButton1Click:Connect(function()
+    if not moved then
+        followEnabled = not followEnabled
+        if followEnabled then
+            FloatBtn.Text = "⚽ FOLLOW: ON"
+            FloatBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+            FloatStroke.Color = Color3.fromRGB(0, 255, 100)
+        else
+            FloatBtn.Text = "⚽ FOLLOW: OFF"
+            FloatBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            FloatStroke.Color = Color3.fromRGB(0, 255, 255)
+            local char = player.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if hum then hum:Move(Vector3.zero, false) end
+        end
+    end
+end)
+
+-- ========== FUNÇÕES ==========
+local function getNearestBall()
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    local nearest, bestDist = nil, math.huge
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and ballSet[obj.Name] then
+            local d = (obj.Position - hrp.Position).Magnitude
+            if d < bestDist then
+                bestDist = d
+                nearest = obj
+            end
+        end
+    end
+    return nearest
+end
+
+local function isManualMoving()
+    local char = player.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if hum and hum.MoveDirection.Magnitude > 0.05 then return true end
+    return UserInputService:IsKeyDown(Enum.KeyCode.W)
+        or UserInputService:IsKeyDown(Enum.KeyCode.A)
+        or UserInputService:IsKeyDown(Enum.KeyCode.S)
+        or UserInputService:IsKeyDown(Enum.KeyCode.D)
+end
+
+-- ========== LOOP ==========
+RunService.RenderStepped:Connect(function()
+    if not followEnabled then return end
+    if isManualMoving() then return end
+    
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+    
+    local ball = getNearestBall()
+    if not ball then return end
+    
+    local delta = ball.Position - hrp.Position
+    local dir = Vector3.new(delta.X, 0, delta.Z)
+    
+    if dir.Magnitude > 1.5 then
+        hum:Move(dir.Unit, false)
+    else
+        hum:Move(Vector3.zero, false)
+    end
+end)
+
+print("✅ FOLLOW BALL carregado! Botão ⚽ no canto")
 -- ========== INIT ==========
 refreshBalls(true)
 updateReachSphere()
