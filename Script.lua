@@ -1450,7 +1450,6 @@ end
 local Auras = {
     -- {Nome, ID do emoji, Cor da borda}
     {"👑 Rei", "rbxassetid://10022568724", Color3.fromRGB(255, 215, 0)},
-    {"🔥 Fogo", "rbxassetid://10022125482", Color3.fromRGB(255, 80, 0)},
     {"❄️ Gelo", "rbxassetid://10022379854", Color3.fromRGB(150, 230, 255)},
     {"⚡ Raio", "rbxassetid://10022121577", Color3.fromRGB(255, 255, 100)},
     {"💀 Sombria", "rbxassetid://10022162617", Color3.fromRGB(120, 0, 150)},
