@@ -1368,6 +1368,134 @@ TabCoresBola:CreateButton({
         RestoreBallColor()
     end
 })
+
+-- ========== ABA AURAS ==========
+local TabAuras = Window:CreateTab("Auras", 4483362458)
+TabAuras:CreateSection("✨ Auras Temáticas")
+
+-- Variável global da aura atual
+local auraAtual = nil
+local auraBorda = nil
+
+-- Remover aura
+local function removerAura()
+    if auraAtual then
+        auraAtual:Destroy()
+        auraAtual = nil
+    end
+    if auraBorda then
+        auraBorda:Destroy()
+        auraBorda = nil
+    end
+end
+
+-- Criar aura completa
+local function criarAura(emojiID, corBorda, nome)
+    removerAura()
+    
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    -- Pasta da aura
+    auraAtual = Instance.new("Folder", char)
+    auraAtual.Name = "AuraAtual"
+    
+    -- Attachment onde os emojis saem
+    local att = Instance.new("Attachment", hrp)
+    att.Position = Vector3.new(0, 0, 0)
+    
+    -- ParticleEmitter com EMOJI
+    local p = Instance.new("ParticleEmitter", att)
+    p.Texture = emojiID
+    p.Color = ColorSequence.new(corBorda, corBorda)
+    p.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1),
+        NumberSequenceKeypoint.new(1, 1.5)
+    })
+    p.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0),
+        NumberSequenceKeypoint.new(0.7, 0.3),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    p.Lifetime = NumberRange.new(1.5, 2.5)
+    p.Rate = 15
+    p.Speed = NumberRange.new(3, 6)
+    p.SpreadAngle = Vector2.new(180, 180)
+    p.Rotation = NumberRange.new(-180, 180)
+    p.RotSpeed = NumberRange.new(-90, 90)
+    p.LightEmission = 0.3
+    p.LightInfluence = 0
+    p.ZOffset = 2
+    
+    -- Borda colorida no personagem
+    auraBorda = Instance.new("Highlight", char)
+    auraBorda.Name = "AuraBorda"
+    auraBorda.FillTransparency = 0.9
+    auraBorda.OutlineTransparency = 0
+    auraBorda.OutlineColor = corBorda
+    auraBorda.FillColor = corBorda
+    auraBorda.DepthMode = Enum.HighlightDepthMode.Occluded
+    
+    Rayfield:Notify({
+        Title = "Gk Reach",
+        Content = "✨ Aura aplicada: " .. nome,
+        Duration = 2,
+        Image = 4483362458
+    })
+end
+
+-- ========== LISTA DE AURAS ==========
+local Auras = {
+    -- {Nome, ID do emoji, Cor da borda}
+    {"👑 Rei", "rbxassetid://10022568724", Color3.fromRGB(255, 215, 0)},
+    {"🔥 Fogo", "rbxassetid://10022125482", Color3.fromRGB(255, 80, 0)},
+    {"❄️ Gelo", "rbxassetid://10022379854", Color3.fromRGB(150, 230, 255)},
+    {"⚡ Raio", "rbxassetid://10022121577", Color3.fromRGB(255, 255, 100)},
+    {"💀 Sombria", "rbxassetid://10022162617", Color3.fromRGB(120, 0, 150)},
+    {"🌈 Arco-Íris", "rbxassetid://10022249841", Color3.fromRGB(255, 100, 200)},
+    {"💎 Diamante", "rbxassetid://10022510786", Color3.fromRGB(150, 240, 255)},
+    {"🩸 Sangue", "rbxassetid://10022155127", Color3.fromRGB(200, 0, 0)},
+    {"🌟 Dourada", "rbxassetid://10022274701", Color3.fromRGB(255, 215, 0)},
+    {"🌌 Galáxia", "rbxassetid://10022239530", Color3.fromRGB(150, 50, 255)},
+    {"💖 Rosa", "rbxassetid://10022181227", Color3.fromRGB(255, 100, 200)},
+    {"💚 Verde", "rbxassetid://10022186811", Color3.fromRGB(0, 255, 80)},
+    {"💙 Azul", "rbxassetid://10022194032", Color3.fromRGB(0, 100, 255)},
+    {"🔴 Vermelha", "rbxassetid://10022203754", Color3.fromRGB(255, 0, 0)},
+    {"🌊 Oceano", "rbxassetid://10022213421", Color3.fromRGB(0, 150, 255)},
+    {"🌋 Lava", "rbxassetid://10022225654", Color3.fromRGB(255, 50, 0)},
+    {"🍀 Esmeralda", "rbxassetid://10022260987", Color3.fromRGB(0, 200, 100)},
+    {"💜 Roxa", "rbxassetid://10022166448", Color3.fromRGB(150, 0, 255)},
+    {"🖤 Negra", "rbxassetid://10022176102", Color3.fromRGB(30, 30, 30)},
+    {"⚪ Branca", "rbxassetid://10022189897", Color3.fromRGB(255, 255, 255)},
+}
+
+-- Botões de cada aura
+for _, a in ipairs(Auras) do
+    TabAuras:CreateButton({
+        Name = a[1],
+        Callback = function()
+            criarAura(a[2], a[3], a[1])
+        end
+    })
+end
+
+-- Botão remover
+TabAuras:CreateSection("Controle")
+
+TabAuras:CreateButton({
+    Name = "❌ REMOVER AURA",
+    Callback = function()
+        removerAura()
+        Rayfield:Notify({
+            Title = "Gk Reach",
+            Content = "❌ Aura removida!",
+            Duration = 2,
+            Image = 4483362458
+        })
+    end
+})
 -- ========== INIT ==========
 refreshBalls(true)
 updateReachSphere()
