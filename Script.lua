@@ -915,6 +915,135 @@ RunService.RenderStepped:Connect(function()
 end)
 
 print("✅ FOLLOW BALL carregado! Botão ⚽ no canto")
+
+-- ========== ABA COR DO CAMPO ==========
+local TabCampo = Window:CreateTab("Cor do Campo", 4483362458)
+TabCampo:CreateSection("🌱 Escolha uma Cor")
+
+-- ========== VARIÁVEIS ==========
+local OriginalGrassParts = {}
+local OriginalTerrainGrassColor = nil
+local Terrain = Workspace:FindFirstChildOfClass("Terrain")
+
+-- ========== VERIFICAR SE É LINHA BRANCA ==========
+local function IsWhiteLine(part)
+    if not part or not part:IsA("BasePart") then return false end
+    local c = part.Color
+    if c.R > 0.85 and c.G > 0.85 and c.B > 0.85 then return true end
+    local n = string.lower(part.Name)
+    for _, word in ipairs({"line", "linha", "white", "branco", "mark", "marca"}) do
+        if string.find(n, word, 1, true) then return true end
+    end
+    local s = part.Size
+    if s.X < 3 or s.Z < 3 then return true end
+    return false
+end
+
+-- ========== VERIFICAR SE É GRAMA ==========
+local function IsGrassPart(part)
+    if not part or not part:IsA("BasePart") then return false end
+    if IsWhiteLine(part) then return false end
+    if part.Size.X < 15 or part.Size.Z < 15 then return false end
+    if not part.Anchored then return false end
+    if part.Material == Enum.Material.Grass then return true end
+    local n = string.lower(part.Name)
+    for _, word in ipairs({"grass", "grama", "campo", "field", "pitch", "turf", "ground", "lawn"}) do
+        if string.find(n, word, 1, true) then return true end
+    end
+    local c = part.Color
+    return part.Size.X >= 30 and part.Size.Z >= 30 and c.G > c.R * 1.10 and c.G > c.B * 1.10
+end
+
+-- ========== APLICAR COR NA GRAMA ==========
+local function ApplyGrass(color)
+    if Terrain then
+        pcall(function()
+            if not OriginalTerrainGrassColor then
+                OriginalTerrainGrassColor = Terrain:GetMaterialColor(Enum.Material.Grass)
+            end
+            Terrain:SetMaterialColor(Enum.Material.Grass, color)
+        end)
+    end
+    for _, v in ipairs(Workspace:GetDescendants()) do
+        if IsGrassPart(v) then
+            if OriginalGrassParts[v] == nil then
+                OriginalGrassParts[v] = v.Color
+            end
+            pcall(function() v.Color = color end)
+        end
+    end
+end
+
+-- ========== RESETAR GRAMA ==========
+local function RestoreGrass()
+    if Terrain and OriginalTerrainGrassColor then
+        pcall(function()
+            Terrain:SetMaterialColor(Enum.Material.Grass, OriginalTerrainGrassColor)
+        end)
+    end
+    for part, color in pairs(OriginalGrassParts) do
+        if part and part.Parent then
+            pcall(function() part.Color = color end)
+        end
+    end
+    OriginalGrassParts = {}
+    Rayfield:Notify({
+        Title = "Gk Reach",
+        Content = "✅ Campo restaurado!",
+        Duration = 2,
+        Image = 4483362458
+    })
+end
+
+-- ========== CORES DISPONÍVEIS ==========
+local GRASS_PRESETS = {
+    {"🔵 Azul", Color3.fromRGB(20, 90, 255)},
+    {"💠 Azul Gelo", Color3.fromRGB(70, 190, 255)},
+    {"💜 Roxo", Color3.fromRGB(120, 40, 200)},
+    {"🟣 Violeta", Color3.fromRGB(170, 60, 255)},
+    {"🔴 Vermelho", Color3.fromRGB(210, 35, 35)},
+    {"❤️ Crimson", Color3.fromRGB(115, 15, 25)},
+    {"🌸 Rosa", Color3.fromRGB(255, 75, 170)},
+    {"🟠 Laranja", Color3.fromRGB(255, 120, 25)},
+    {"🌟 Dourado", Color3.fromRGB(220, 175, 35)},
+    {"⚫ Preto", Color3.fromRGB(20, 20, 20)},
+    {"🔷 Ciano", Color3.fromRGB(25, 220, 215)},
+    {"🍋 Lime", Color3.fromRGB(120, 255, 25)},
+    {"💚 Verde Neon", Color3.fromRGB(0, 255, 70)},
+    {"💗 Magenta", Color3.fromRGB(255, 0, 150)},
+    {"🌺 Coral", Color3.fromRGB(255, 127, 80)},
+    {"🌌 Índigo", Color3.fromRGB(75, 0, 130)},
+    {"🟤 Marrom", Color3.fromRGB(139, 69, 19)},
+    {"⚙️ Cinza", Color3.fromRGB(128, 128, 128)},
+    {"🔘 Cinza Escuro", Color3.fromRGB(60, 60, 60)},
+    {"🌈 Arco-Íris", Color3.fromRGB(255, 100, 200)},
+}
+
+-- ========== BOTÕES DAS CORES ==========
+for _, c in ipairs(GRASS_PRESETS) do
+    TabCampo:CreateButton({
+        Name = c[1],
+        Callback = function()
+            ApplyGrass(c[2])
+            Rayfield:Notify({
+                Title = "Gk Reach",
+                Content = "🌱 Cor aplicada: " .. c[1],
+                Duration = 2,
+                Image = 4483362458
+            })
+        end
+    })
+end
+
+-- ========== BOTÃO RESETAR ==========
+TabCampo:CreateSection("Controle")
+
+TabCampo:CreateButton({
+    Name = "🔄 RESETAR CAMPO",
+    Callback = function()
+        RestoreGrass()
+    end
+})
 -- ========== INIT ==========
 refreshBalls(true)
 updateReachSphere()
