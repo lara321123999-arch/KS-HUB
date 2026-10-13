@@ -1044,6 +1044,330 @@ TabCampo:CreateButton({
         RestoreGrass()
     end
 })
+
+-- ========== ABA GRÁFICOS ==========
+local TabGraf = Window:CreateTab("Gráficos", 4483362458)
+TabGraf:CreateSection("📺 Shaders")
+
+-- Variáveis
+local OriginalBallVisuals = setmetatable({}, {__mode = "k"})
+local BallFireEnabled = false
+local BallFire = nil
+
+-- Função limpar shaders
+local function LimparShaders()
+    for _, v in ipairs(Lighting:GetChildren()) do
+        if v:IsA("ColorCorrectionEffect") or v:IsA("BloomEffect") or 
+           v:IsA("SunRaysEffect") or v:IsA("DepthOfFieldEffect") or 
+           v:IsA("BlurEffect") then
+            v:Destroy()
+        end
+    end
+end
+
+-- Shaders
+local function ApplyCinematicShader()
+    LimparShaders()
+    local cc = Instance.new("ColorCorrectionEffect")
+    cc.Brightness = -0.05
+    cc.Contrast = 0.4
+    cc.Saturation = 0.1
+    cc.TintColor = Color3.fromRGB(255, 240, 220)
+    cc.Parent = Lighting
+    local bloom = Instance.new("BloomEffect")
+    bloom.Intensity = 1
+    bloom.Size = 24
+    bloom.Threshold = 0.95
+    bloom.Parent = Lighting
+    local dof = Instance.new("DepthOfFieldEffect")
+    dof.FocusDistance = 20
+    dof.InFocusRadius = 30
+    dof.FarIntensity = 0.2
+    dof.NearIntensity = 0.1
+    dof.Parent = Lighting
+end
+
+local function ApplyVibrantShader()
+    LimparShaders()
+    local cc = Instance.new("ColorCorrectionEffect")
+    cc.Brightness = 0.05
+    cc.Contrast = 0.3
+    cc.Saturation = 0.6
+    cc.TintColor = Color3.fromRGB(255, 220, 255)
+    cc.Parent = Lighting
+    local bloom = Instance.new("BloomEffect")
+    bloom.Intensity = 1.5
+    bloom.Size = 30
+    bloom.Threshold = 0.8
+    bloom.Parent = Lighting
+end
+
+local function ApplyDarkShader()
+    LimparShaders()
+    local cc = Instance.new("ColorCorrectionEffect")
+    cc.Brightness = -0.1
+    cc.Contrast = 0.3
+    cc.Saturation = -0.2
+    cc.TintColor = Color3.fromRGB(180, 180, 220)
+    cc.Parent = Lighting
+    local bloom = Instance.new("BloomEffect")
+    bloom.Intensity = 0.5
+    bloom.Size = 20
+    bloom.Threshold = 1
+    bloom.Parent = Lighting
+end
+
+local function ApplyColdShader()
+    LimparShaders()
+    local cc = Instance.new("ColorCorrectionEffect")
+    cc.Brightness = 0.05
+    cc.Contrast = 0.15
+    cc.Saturation = 0.1
+    cc.TintColor = Color3.fromRGB(200, 220, 255)
+    cc.Parent = Lighting
+    local bloom = Instance.new("BloomEffect")
+    bloom.Intensity = 1
+    bloom.Size = 25
+    bloom.Threshold = 0.9
+    bloom.Parent = Lighting
+end
+
+local function ApplyLowGraphics()
+    pcall(function()
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 500
+        for _, v in ipairs(Workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+                v.Enabled = false
+            end
+        end
+    end)
+end
+
+local function ApplyVeryLowGraphics()
+    pcall(function()
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 200
+        Lighting.Brightness = 1
+        for _, v in ipairs(Workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+                v.Enabled = false
+            end
+        end
+    end)
+end
+
+local function ApplyPlasticMode()
+    for _, v in ipairs(Workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Material = Enum.Material.Plastic
+        end
+    end
+end
+
+local function ApplyPlasticLite()
+    local count = 0
+    for _, v in ipairs(Workspace:GetDescendants()) do
+        if v:IsA("BasePart") and count < 500 then
+            v.Material = Enum.Material.Plastic
+            count = count + 1
+        end
+    end
+end
+
+local function RestoreGraphics()
+    LimparShaders()
+    pcall(function()
+        Lighting.GlobalShadows = true
+        Lighting.FogEnd = 100000
+        Lighting.Brightness = 2
+        Lighting.Ambient = Color3.fromRGB(70, 70, 70)
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    end)
+end
+
+-- Botões de Gráficos
+TabGraf:CreateButton({Name = "✨ Shader Cinemático", Callback = function() ApplyCinematicShader() Rayfield:Notify({Title = "Gk Reach", Content = "Shader Cinemático aplicado!", Duration = 2, Image = 4483362458}) end})
+TabGraf:CreateButton({Name = "🎨 Shader Vibrante", Callback = function() ApplyVibrantShader() Rayfield:Notify({Title = "Gk Reach", Content = "Shader Vibrante aplicado!", Duration = 2, Image = 4483362458}) end})
+TabGraf:CreateButton({Name = "🌑 Shader Escuro", Callback = function() ApplyDarkShader() Rayfield:Notify({Title = "Gk Reach", Content = "Shader Escuro aplicado!", Duration = 2, Image = 4483362458}) end})
+TabGraf:CreateButton({Name = "❄️ Shader Frio", Callback = function() ApplyColdShader() Rayfield:Notify({Title = "Gk Reach", Content = "Shader Frio aplicado!", Duration = 2, Image = 4483362458}) end})
+
+TabGraf:CreateSection("📉 Performance")
+
+TabGraf:CreateButton({Name = "📉 Gráficos Baixos", Callback = function() ApplyLowGraphics() Rayfield:Notify({Title = "Gk Reach", Content = "Gráficos baixos ativados!", Duration = 2, Image = 4483362458}) end})
+TabGraf:CreateButton({Name = "📉 Gráficos Muito Baixos", Callback = function() ApplyVeryLowGraphics() Rayfield:Notify({Title = "Gk Reach", Content = "Gráficos muito baixos!", Duration = 2, Image = 4483362458}) end})
+TabGraf:CreateButton({Name = "🔲 Modo Massinha", Callback = function() ApplyPlasticMode() Rayfield:Notify({Title = "Gk Reach", Content = "Modo Massinha ativado!", Duration = 2, Image = 4483362458}) end})
+TabGraf:CreateButton({Name = "🔲 Massinha Leve", Callback = function() ApplyPlasticLite() Rayfield:Notify({Title = "Gk Reach", Content = "Massinha Leve ativado!", Duration = 2, Image = 4483362458}) end})
+
+TabGraf:CreateSection("Controle")
+
+TabGraf:CreateButton({Name = "🔄 Restaurar Gráficos", Callback = function() RestoreGraphics() Rayfield:Notify({Title = "Gk Reach", Content = "Gráficos restaurados!", Duration = 2, Image = 4483362458}) end})
+
+-- ========== ABA CORES DA BOLA ==========
+local TabCoresBola = Window:CreateTab("Cores da Bola", 4483362458)
+TabCoresBola:CreateSection("⚽ Cores Disponíveis")
+
+-- Funções da bola
+local function SaveBallVisual(obj)
+    if OriginalBallVisuals[obj] then return end
+    if obj:IsA("BasePart") then
+        OriginalBallVisuals[obj] = {T = "Part", Color = obj.Color}
+    elseif obj:IsA("Decal") or obj:IsA("Texture") then
+        OriginalBallVisuals[obj] = {T = "Texture", Color = obj.Color3, Transparency = obj.Transparency}
+    elseif obj:IsA("SpecialMesh") then
+        OriginalBallVisuals[obj] = {T = "Mesh", VertexColor = obj.VertexColor}
+    end
+end
+
+local function ColorBallObject(obj, color)
+    SaveBallVisual(obj)
+    pcall(function()
+        if obj:IsA("BasePart") then
+            obj.Color = color
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            obj.Color3 = color
+        elseif obj:IsA("SpecialMesh") then
+            obj.VertexColor = Vector3.new(color.R, color.G, color.B)
+        end
+    end)
+end
+
+local function IsBall(part)
+    if not part or not part:IsA("BasePart") then return false end
+    if part.Anchored then return false end
+    if part:IsDescendantOf(player.Character) then return false end
+    local nome = string.lower(part.Name)
+    if nome:find("tps") or nome:find("ball") or nome:find("bola") or 
+       nome:find("esa") or nome:find("mrs") or nome:find("prs") then
+        return true
+    end
+    local size = part.Size
+    local media = (size.X + size.Y + size.Z) / 3
+    local desvio = math.abs(size.X - media) + math.abs(size.Y - media) + math.abs(size.Z - media)
+    return media > 0.5 and media < 8 and desvio < 0.5
+end
+
+local function GetBalls()
+    local tps, fallback = {}, {}
+    for _, v in ipairs(Workspace:GetDescendants()) do
+        if IsBall(v) then
+            if string.lower(v.Name) == "tps" then
+                table.insert(tps, v)
+            else
+                table.insert(fallback, v)
+            end
+        end
+    end
+    return #tps > 0 and tps or fallback
+end
+
+local function SetBallColor(color)
+    BallFireEnabled = false
+    if BallFire then BallFire:Destroy() BallFire = nil end
+    for _, ball in ipairs(GetBalls()) do
+        ColorBallObject(ball, color)
+        for _, v in ipairs(ball:GetDescendants()) do
+            if v:IsA("Decal") or v:IsA("Texture") or v:IsA("SpecialMesh") then
+                ColorBallObject(v, color)
+            end
+        end
+    end
+    Rayfield:Notify({Title = "Gk Reach", Content = "⚽ Cor aplicada na bola!", Duration = 2, Image = 4483362458})
+end
+
+local function RestoreBallColor()
+    BallFireEnabled = false
+    if BallFire then BallFire:Destroy() BallFire = nil end
+    for obj, data in pairs(OriginalBallVisuals) do
+        pcall(function()
+            if not obj.Parent then return end
+            if data.T == "Part" then
+                obj.Color = data.Color
+            elseif data.T == "Texture" then
+                obj.Color3 = data.Color
+                obj.Transparency = data.Transparency or 0
+            elseif data.T == "Mesh" then
+                obj.VertexColor = data.VertexColor
+            end
+        end)
+    end
+    OriginalBallVisuals = setmetatable({}, {__mode = "k"})
+    Rayfield:Notify({Title = "Gk Reach", Content = "🔄 Bola restaurada!", Duration = 2, Image = 4483362458})
+end
+
+-- Fogo na Bola
+TabCoresBola:CreateToggle({
+    Name = "🔥 Fogo na Bola",
+    CurrentValue = false,
+    Flag = "BallFireToggle",
+    Callback = function(v)
+        BallFireEnabled = v
+        if v then
+            task.spawn(function()
+                while BallFireEnabled do
+                    for _, ball in ipairs(GetBalls()) do
+                        if ball and ball.Parent then
+                            local fire = ball:FindFirstChild("LuxzBallFire")
+                            if not fire then
+                                fire = Instance.new("Fire")
+                                fire.Name = "LuxzBallFire"
+                                fire.Size = 5
+                                fire.Heat = 10
+                                fire.Color = Color3.fromRGB(255, 100, 0)
+                                fire.SecondaryColor = Color3.fromRGB(255, 180, 0)
+                                fire.Parent = ball
+                            end
+                        end
+                    end
+                    task.wait(0.5)
+                end
+                for _, ball in ipairs(GetBalls()) do
+                    local fire = ball:FindFirstChild("LuxzBallFire")
+                    if fire then fire:Destroy() end
+                end
+            end)
+        else
+            for _, ball in ipairs(GetBalls()) do
+                local fire = ball:FindFirstChild("LuxzBallFire")
+                if fire then fire:Destroy() end
+            end
+        end
+    end
+})
+
+-- Cores
+local CoresBola = {
+    {"🔴 Vermelha", Color3.fromRGB(255, 35, 35)},
+    {"🔵 Azul", Color3.fromRGB(25, 90, 255)},
+    {"🟣 Roxa", Color3.fromRGB(160, 40, 255)},
+    {"🌸 Rosa", Color3.fromRGB(255, 60, 170)},
+    {"🟢 Verde", Color3.fromRGB(25, 255, 90)},
+    {"🔷 Ciano", Color3.fromRGB(0, 230, 255)},
+    {"🌟 Dourada", Color3.fromRGB(255, 190, 20)},
+    {"⚪ Branca", Color3.new(1, 1, 1)},
+    {"⚫ Preta", Color3.fromRGB(10, 10, 10)},
+    {"🟠 Laranja", Color3.fromRGB(255, 120, 25)},
+    {"💜 Neon Roxo", Color3.fromRGB(200, 0, 255)},
+    {"💚 Neon Verde", Color3.fromRGB(0, 255, 70)},
+}
+
+for _, c in ipairs(CoresBola) do
+    TabCoresBola:CreateButton({
+        Name = c[1],
+        Callback = function()
+            SetBallColor(c[2])
+        end
+    })
+end
+
+TabCoresBola:CreateSection("Controle")
+
+TabCoresBola:CreateButton({
+    Name = "🔄 Restaurar Bola Original",
+    Callback = function()
+        RestoreBallColor()
+    end
+})
 -- ========== INIT ==========
 refreshBalls(true)
 updateReachSphere()
