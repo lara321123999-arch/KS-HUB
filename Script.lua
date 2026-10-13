@@ -1203,44 +1203,25 @@ TabGraf:CreateSection("Controle")
 
 TabGraf:CreateButton({Name = "🔄 Restaurar Gráficos", Callback = function() RestoreGraphics() Rayfield:Notify({Title = "Gk Reach", Content = "Gráficos restaurados!", Duration = 2, Image = 4483362458}) end})
 
--- ========== ABA CORES DA BOLA ==========
+-- ========== ABA CORES DA BOLA - KS HUB ==========
 local TabCoresBola = Window:CreateTab("Cores da Bola", 4483362458)
-TabCoresBola:CreateSection("⚽ Cores Disponíveis")
+TabCoresBola:CreateSection("⚽ Escolha uma Cor")
 
--- Funções da bola
-local function SaveBallVisual(obj)
-    if OriginalBallVisuals[obj] then return end
-    if obj:IsA("BasePart") then
-        OriginalBallVisuals[obj] = {T = "Part", Color = obj.Color}
-    elseif obj:IsA("Decal") or obj:IsA("Texture") then
-        OriginalBallVisuals[obj] = {T = "Texture", Color = obj.Color3, Transparency = obj.Transparency}
-    elseif obj:IsA("SpecialMesh") then
-        OriginalBallVisuals[obj] = {T = "Mesh", VertexColor = obj.VertexColor}
-    end
-end
+-- ========== VARIÁVEIS ==========
+local OriginalBallVisuals = setmetatable({}, {__mode = "k"})
 
-local function ColorBallObject(obj, color)
-    SaveBallVisual(obj)
-    pcall(function()
-        if obj:IsA("BasePart") then
-            obj.Color = color
-        elseif obj:IsA("Decal") or obj:IsA("Texture") then
-            obj.Color3 = color
-        elseif obj:IsA("SpecialMesh") then
-            obj.VertexColor = Vector3.new(color.R, color.G, color.B)
-        end
-    end)
-end
-
+-- ========== DETECTAR BOLA ==========
 local function IsBall(part)
     if not part or not part:IsA("BasePart") then return false end
     if part.Anchored then return false end
     if part:IsDescendantOf(player.Character) then return false end
+    
     local nome = string.lower(part.Name)
     if nome:find("tps") or nome:find("ball") or nome:find("bola") or 
        nome:find("esa") or nome:find("mrs") or nome:find("prs") then
         return true
     end
+    
     local size = part.Size
     local media = (size.X + size.Y + size.Z) / 3
     local desvio = math.abs(size.X - media) + math.abs(size.Y - media) + math.abs(size.Z - media)
@@ -1261,10 +1242,46 @@ local function GetBalls()
     return #tps > 0 and tps or fallback
 end
 
-local function SetBallColor(color)
-    BallFireEnabled = false
-    if BallFire then BallFire:Destroy() BallFire = nil end
-    for _, ball in ipairs(GetBalls()) do
+-- ========== SALVAR VISUAL ORIGINAL ==========
+local function SaveBallVisual(obj)
+    if OriginalBallVisuals[obj] then return end
+    if obj:IsA("BasePart") then
+        OriginalBallVisuals[obj] = {T = "Part", Color = obj.Color}
+    elseif obj:IsA("Decal") or obj:IsA("Texture") then
+        OriginalBallVisuals[obj] = {T = "Texture", Color = obj.Color3, Transparency = obj.Transparency}
+    elseif obj:IsA("SpecialMesh") then
+        OriginalBallVisuals[obj] = {T = "Mesh", VertexColor = obj.VertexColor}
+    end
+end
+
+-- ========== APLICAR COR EM UM OBJETO ==========
+local function ColorBallObject(obj, color)
+    SaveBallVisual(obj)
+    pcall(function()
+        if obj:IsA("BasePart") then
+            obj.Color = color
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            obj.Color3 = color
+        elseif obj:IsA("SpecialMesh") then
+            obj.VertexColor = Vector3.new(color.R, color.G, color.B)
+        end
+    end)
+end
+
+-- ========== APLICAR COR (UMA VEZ) ==========
+local function SetBallColor(color, nome)
+    local bolas = GetBalls()
+    if #bolas == 0 then
+        Rayfield:Notify({
+            Title = "Gk Reach",
+            Content = "⚠️ Bola não encontrada!",
+            Duration = 2,
+            Image = 4483362458
+        })
+        return
+    end
+    
+    for _, ball in ipairs(bolas) do
         ColorBallObject(ball, color)
         for _, v in ipairs(ball:GetDescendants()) do
             if v:IsA("Decal") or v:IsA("Texture") or v:IsA("SpecialMesh") then
@@ -1272,12 +1289,17 @@ local function SetBallColor(color)
             end
         end
     end
-    Rayfield:Notify({Title = "Gk Reach", Content = "⚽ Cor aplicada na bola!", Duration = 2, Image = 4483362458})
+    
+    Rayfield:Notify({
+        Title = "Gk Reach",
+        Content = "⚽ Cor aplicada: " .. (nome or "personalizada"),
+        Duration = 2,
+        Image = 4483362458
+    })
 end
 
+-- ========== RESTAURAR ==========
 local function RestoreBallColor()
-    BallFireEnabled = false
-    if BallFire then BallFire:Destroy() BallFire = nil end
     for obj, data in pairs(OriginalBallVisuals) do
         pcall(function()
             if not obj.Parent then return end
@@ -1292,74 +1314,54 @@ local function RestoreBallColor()
         end)
     end
     OriginalBallVisuals = setmetatable({}, {__mode = "k"})
-    Rayfield:Notify({Title = "Gk Reach", Content = "🔄 Bola restaurada!", Duration = 2, Image = 4483362458})
+    
+    Rayfield:Notify({
+        Title = "Gk Reach",
+        Content = "🔄 Bola restaurada!",
+        Duration = 2,
+        Image = 4483362458
+    })
 end
 
--- Fogo na Bola
-TabCoresBola:CreateToggle({
-    Name = "🔥 Fogo na Bola",
-    CurrentValue = false,
-    Flag = "BallFireToggle",
-    Callback = function(v)
-        BallFireEnabled = v
-        if v then
-            task.spawn(function()
-                while BallFireEnabled do
-                    for _, ball in ipairs(GetBalls()) do
-                        if ball and ball.Parent then
-                            local fire = ball:FindFirstChild("LuxzBallFire")
-                            if not fire then
-                                fire = Instance.new("Fire")
-                                fire.Name = "LuxzBallFire"
-                                fire.Size = 5
-                                fire.Heat = 10
-                                fire.Color = Color3.fromRGB(255, 100, 0)
-                                fire.SecondaryColor = Color3.fromRGB(255, 180, 0)
-                                fire.Parent = ball
-                            end
-                        end
-                    end
-                    task.wait(0.5)
-                end
-                for _, ball in ipairs(GetBalls()) do
-                    local fire = ball:FindFirstChild("LuxzBallFire")
-                    if fire then fire:Destroy() end
-                end
-            end)
-        else
-            for _, ball in ipairs(GetBalls()) do
-                local fire = ball:FindFirstChild("LuxzBallFire")
-                if fire then fire:Destroy() end
-            end
-        end
-    end
-})
-
--- Cores
+-- ========== LISTA DE CORES ==========
 local CoresBola = {
-    {"🔴 Vermelha", Color3.fromRGB(255, 35, 35)},
-    {"🔵 Azul", Color3.fromRGB(25, 90, 255)},
-    {"🟣 Roxa", Color3.fromRGB(160, 40, 255)},
-    {"🌸 Rosa", Color3.fromRGB(255, 60, 170)},
-    {"🟢 Verde", Color3.fromRGB(25, 255, 90)},
-    {"🔷 Ciano", Color3.fromRGB(0, 230, 255)},
-    {"🌟 Dourada", Color3.fromRGB(255, 190, 20)},
-    {"⚪ Branca", Color3.new(1, 1, 1)},
-    {"⚫ Preta", Color3.fromRGB(10, 10, 10)},
-    {"🟠 Laranja", Color3.fromRGB(255, 120, 25)},
+    {"⚪ Branca", Color3.fromRGB(255, 255, 255)},
+    {"⚫ Preta", Color3.fromRGB(30, 30, 30)},
+    {"🔴 Vermelha", Color3.fromRGB(255, 0, 0)},
+    {"🔵 Azul", Color3.fromRGB(0, 100, 255)},
+    {"🟢 Verde", Color3.fromRGB(0, 255, 0)},
+    {"🟡 Amarela", Color3.fromRGB(255, 255, 0)},
+    {"🟣 Roxa", Color3.fromRGB(150, 0, 255)},
+    {"🟠 Laranja", Color3.fromRGB(255, 150, 0)},
+    {"💗 Rosa", Color3.fromRGB(255, 0, 150)},
+    {"💠 Ciano", Color3.fromRGB(0, 255, 255)},
+    {"🌟 Dourada", Color3.fromRGB(255, 215, 0)},
     {"💜 Neon Roxo", Color3.fromRGB(200, 0, 255)},
-    {"💚 Neon Verde", Color3.fromRGB(0, 255, 70)},
+    {"💚 Neon Verde", Color3.fromRGB(0, 255, 100)},
+    {"🧡 Neon Laranja", Color3.fromRGB(255, 100, 0)},
+    {"💖 Neon Rosa", Color3.fromRGB(255, 20, 147)},
+    {"🔵 Azul Marinho", Color3.fromRGB(0, 0, 139)},
+    {"🟤 Marrom", Color3.fromRGB(139, 69, 19)},
+    {"⚪ Cinza", Color3.fromRGB(128, 128, 128)},
+    {"💎 Azul Bebê", Color3.fromRGB(173, 216, 230)},
+    {"🍇 Uva", Color3.fromRGB(100, 0, 150)},
+    {"🔥 Fogo", Color3.fromRGB(255, 50, 0)},
+    {"❄️ Gelo", Color3.fromRGB(150, 220, 255)},
+    {"🌺 Coral", Color3.fromRGB(255, 127, 80)},
+    {"🍋 Limão", Color3.fromRGB(200, 255, 0)},
+    {"🩸 Sangue", Color3.fromRGB(150, 0, 0)},
 }
 
 for _, c in ipairs(CoresBola) do
     TabCoresBola:CreateButton({
         Name = c[1],
         Callback = function()
-            SetBallColor(c[2])
+            SetBallColor(c[2], c[1])
         end
     })
 end
 
+-- ========== BOTÃO RESETAR ==========
 TabCoresBola:CreateSection("Controle")
 
 TabCoresBola:CreateButton({
